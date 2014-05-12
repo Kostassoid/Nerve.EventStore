@@ -1,5 +1,7 @@
-﻿namespace Kostassoid.Nerve.EventStore.Model
+﻿namespace Kostassoid.Nerve.EventStore.Specs.Model
 {
+	using Nerve.EventStore.Model;
+
 	public class UserNameChanged : DomainEvent
 	{
 		public string NewName { get; set; }

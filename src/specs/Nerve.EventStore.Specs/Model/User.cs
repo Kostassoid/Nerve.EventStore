@@ -1,6 +1,7 @@
-﻿namespace Kostassoid.Nerve.EventStore.Model
+﻿namespace Kostassoid.Nerve.EventStore.Specs.Model
 {
 	using System;
+	using Nerve.EventStore.Model;
 
 	public class User : AggregateRoot
 	{

@@ -1,9 +1,9 @@
-﻿namespace Kostassoid.Nerve.EventStore.Command
+﻿namespace Kostassoid.Nerve.EventStore.Specs.Command
 {
 	using System;
-	using Kostassoid.Nerve.Core;
-	using Kostassoid.Nerve.Core.Processing.Operators;
-	using Kostassoid.Nerve.Core.Scheduling;
+	using Core;
+	using Core.Processing.Operators;
+	using Core.Scheduling;
 	using Model;
 
 	public class CommandHandler : Cell

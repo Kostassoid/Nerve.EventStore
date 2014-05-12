@@ -56,11 +56,24 @@
     <Compile Include="..\..\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Class1.cs" />
+    <Compile Include="BasicSpecs.cs" />
+    <Compile Include="Command\ChangeUserName.cs" />
+    <Compile Include="Command\CommandHandler.cs" />
+    <Compile Include="Command\CreateUser.cs" />
+    <Compile Include="InMemoryEventStorage.cs" />
+    <Compile Include="Model\User.cs" />
+    <Compile Include="Model\UserCreated.cs" />
+    <Compile Include="Model\UserNameChanged.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\main\Nerve.EventStore\Nerve.EventStore.csproj">
+      <Project>{E4D19EF5-3579-4C68-A951-1D88014E1DF6}</Project>
+      <Name>Nerve.EventStore</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

@@ -1,6 +1,7 @@
-﻿namespace Kostassoid.Nerve.EventStore.Command
+﻿namespace Kostassoid.Nerve.EventStore.Specs.Command
 {
 	using System;
+	using Nerve.EventStore.Command;
 
 	public class CreateUser : ICommand
 	{

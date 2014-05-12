@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Nerve.EventStore</id>
+    <title>Nerve.EventStore</title>
+    <version>$version$</version>
+    <authors>Konstantin Alexandroff</authors>
+    <owners>Konstantin Alexandroff</owners>
+    <projectUrl>https://github.com/Kostassoid/Nerve.EventStore</projectUrl>
+<!--    <iconUrl>http://i.kostassoid.com/nerve/logo-nuget.png</iconUrl> -->
+    <licenseUrl>https://raw.githubusercontent.com/Kostassoid/Nerve.EventStore/master/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <language>en-US</language>
+    <summary>EventStore based on Nerve messaging library.</summary>
+    <description>Nerve.EventStore provides a versatile framework for building apps based on CQRS/ES architecture.</description>
+    <copyright>Copyright 2014</copyright>
+    <tags>event eventstore store message bus messaging cqrs es</tags>
+  </metadata>
+  <files>
+    <file src="..\output\built\*.*" target="lib\net40\" />
+    <file src="..\*LICENSE*" target="\" />
+  </files>
+</package>

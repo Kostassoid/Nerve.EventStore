@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nerve.EventStore", "main\Nerve.EventStore\Nerve.EventStore.csproj", "{E4D19EF5-3579-4C68-A951-1D88014E1DF6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{0F79FCF9-8C35-4C3C-A160-2231C95148B7}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "main", "main", "{E1CC77B8-522F-41ED-9591-B24FB28253D8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "specs", "specs", "{B99AF3BF-0097-45FC-8938-198653D6447C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nerve.EventStore.Specs", "specs\Nerve.EventStore.Specs\Nerve.EventStore.Specs.csproj", "{68D9E7F5-D9C5-46B6-AFCA-44EAA3C72F81}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{AC22D977-607C-4773-A44C-45DE2E70B221}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E4D19EF5-3579-4C68-A951-1D88014E1DF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E4D19EF5-3579-4C68-A951-1D88014E1DF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E4D19EF5-3579-4C68-A951-1D88014E1DF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E4D19EF5-3579-4C68-A951-1D88014E1DF6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68D9E7F5-D9C5-46B6-AFCA-44EAA3C72F81}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68D9E7F5-D9C5-46B6-AFCA-44EAA3C72F81}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68D9E7F5-D9C5-46B6-AFCA-44EAA3C72F81}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68D9E7F5-D9C5-46B6-AFCA-44EAA3C72F81}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E4D19EF5-3579-4C68-A951-1D88014E1DF6} = {E1CC77B8-522F-41ED-9591-B24FB28253D8}
+		{68D9E7F5-D9C5-46B6-AFCA-44EAA3C72F81} = {B99AF3BF-0097-45FC-8938-198653D6447C}
+	EndGlobalSection
+EndGlobal

@@ -52,6 +52,7 @@
     </Compile>
     <Compile Include="AggregateIdentity.cs" />
     <Compile Include="Command\ICommand.cs" />
+    <Compile Include="IEventStore.cs" />
     <Compile Include="EventBus.cs" />
     <Compile Include="EventStore.cs" />
     <Compile Include="Model\AggregateRoot.cs" />

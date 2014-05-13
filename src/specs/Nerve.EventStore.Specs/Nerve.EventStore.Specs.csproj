@@ -61,6 +61,7 @@
     <Compile Include="Command\CommandHandler.cs" />
     <Compile Include="Command\CreateUser.cs" />
     <Compile Include="InMemoryEventStorage.cs" />
+    <Compile Include="Model\UserAgeChanged.cs" />
     <Compile Include="Model\User.cs" />
     <Compile Include="Model\UserCreated.cs" />
     <Compile Include="Model\UserNameChanged.cs" />

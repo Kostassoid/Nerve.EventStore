@@ -14,7 +14,6 @@
 namespace Kostassoid.Nerve.EventStore.Specs
 {
 	using System;
-	using Core;
 	using Core.Processing.Operators;
 	using Machine.Specifications;
 	using Model;
@@ -30,32 +29,82 @@ namespace Kostassoid.Nerve.EventStore.Specs
 		{
 			private static EventStore _store;
 
-			private static User _stored;
+			private static Guid _id;
 			private static User _loaded;
 
-			private Cleanup after = () => _store.Dispose();
+			private Cleanup after = () =>
+			{
+				_store.Dispose();
+				EventBus.Reset();
+			};
 
 			private Establish context = () =>
 			{
 				_store = new EventStore(new InMemoryEventStorage());
 				EventBus.OnStream().Of<UncommitedEventStream>().ReactWith(_store);
+
+				_id = Guid.NewGuid();
+				var user = User.Create(_id, "Joe", 33);
+				user.Commit().Wait();
 			};
 
 			private Because of = () =>
 			{
-				_stored = User.Create(Guid.NewGuid(), "Joe", 33);
-				_stored.Commit();
-
-				_loaded = _store.Load<User>(_stored.Id);
+				_loaded = _store.Load<User>(_id);
 			};
 
 			private It should_not_be_null = () => _loaded.ShouldNotBeNull();
 
-			private It should_be_in_valid_state = () =>
+			private It should_have_properties_set = () =>
 			{
-				_loaded.Id.ShouldEqual(_stored.Id);
-				_loaded.Name.ShouldEqual(_stored.Name);
-				_loaded.Age.ShouldEqual(_stored.Age);
+				_loaded.Id.ShouldEqual(_id);
+				_loaded.Name.ShouldEqual("Joe");
+				_loaded.Age.ShouldEqual(33);
+			};
+		}
+
+		[Subject(typeof(EventStore), "Basic")]
+		[Tags("Unit")]
+		public class when_loading_updated_aggregate
+		{
+			private static EventStore _store;
+
+			private static Guid _id;
+			private static User _loaded;
+
+			private Cleanup after = () =>
+			{
+				_store.Dispose();
+				EventBus.Reset();
+			};
+
+			private Establish context = () =>
+			{
+				_store = new EventStore(new InMemoryEventStorage());
+				EventBus.OnStream().Of<UncommitedEventStream>().ReactWith(_store);
+
+				_id = Guid.NewGuid();
+				var user = User.Create(_id, "Joe", 33);
+				user.Commit().Wait();
+
+				user = _store.Load<User>(_id);
+				user.ChangeName("Bill");
+				user.Birthday();
+				user.Commit().Wait();
+			};
+
+			private Because of = () =>
+			{
+				_loaded = _store.Load<User>(_id);
+			};
+
+			private It should_not_be_null = () => _loaded.ShouldNotBeNull();
+
+			private It should_have_updated_properties = () =>
+			{
+				_loaded.Id.ShouldEqual(_id);
+				_loaded.Name.ShouldEqual("Bill");
+				_loaded.Age.ShouldEqual(34);
 			};
 		}
 

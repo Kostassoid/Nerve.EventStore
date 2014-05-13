@@ -44,5 +44,14 @@
 			Name = ev.NewName;
 		}
 
+		public void Birthday()
+		{
+			Apply(new UserAgeChanged(this, Age + 1));
+		}
+
+		protected void OnUserAgeChanged(UserAgeChanged ev)
+		{
+			Age = ev.NewAge;
+		}
 	}
 }

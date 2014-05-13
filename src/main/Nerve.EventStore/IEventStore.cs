@@ -11,19 +11,16 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 
-namespace Kostassoid.Nerve.EventStore.Model
+namespace Kostassoid.Nerve.EventStore
 {
-	using System.Collections.Generic;
+	using System;
+	using Core;
+	using Model;
 
-	public class UncommitedEventStream
+	public interface IEventStore
 	{
-		public AggregateRoot Root { get; private set; }
-		public IList<IDomainEvent> UncommitedEvents { get; private set; }
+		T Load<T>(Guid id) where T : AggregateRoot;
 
-		public UncommitedEventStream(AggregateRoot root, IList<IDomainEvent> uncommitedEvents)
-		{
-			Root = root;
-			UncommitedEvents = uncommitedEvents;
-		}
+		void ProcessUncommited(ISignal<UncommitedEventStream> uncommited);
 	}
 }

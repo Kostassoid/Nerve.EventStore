@@ -13,36 +13,42 @@
 
 namespace Kostassoid.Nerve.EventStore
 {
-	using System;
 	using System.Threading;
 	using System.Threading.Tasks;
-	using Core.Processing.Operators;
-	using Model;
+	using Core;
+	using Core.Tpl;
 
-	public class EventStore
+	public static class DomainBus
 	{
-		EventStoreProcessor _processor;
-		Action _unsubscribeAction = () => {};
+		const string Name = "DomainBus";
 
-		public void Configure(Action<IEventStoreConfigurator> configAction)
+		static ICell _cell = new Cell(Name);
+
+		public static ICell Cell
 		{
-			var configuration = new EventStoreConfiguration();
-			configAction(configuration);
-
-			_unsubscribeAction();
-
-			var processor = new EventStoreProcessor(configuration.Storage);
-			var unsubscribe = configuration.Source.OnStream().Of<UncommitedEventStream>().ReactWith(DomainBus.Cell);
-			_unsubscribeAction = unsubscribe.Dispose;
-
-			Interlocked
-				.Exchange(ref _processor, processor)
-				.Dispose();
+			get { return _cell; }
 		}
 
-		public Task Commit(IAggregateRoot root)
+		public static ILinkJunction OnStream()
 		{
-			return DomainBus.RaiseWithTask(root.Flush());
+			return _cell.OnStream();
+		}
+
+		public static void Raise<T>(T ev) where T : class
+		{
+			_cell.Send(ev);
+		}
+
+		public static Task RaiseWithTask<T>(T ev) where T : class
+		{
+			return _cell.SendFor<object>(ev);
+		}
+
+		public static void Reset()
+		{
+			Interlocked
+				.Exchange(ref _cell, new Cell(Name))
+				.Dispose();
 		}
 	}
 }

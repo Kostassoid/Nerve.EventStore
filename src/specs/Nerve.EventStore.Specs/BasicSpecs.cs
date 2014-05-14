@@ -35,17 +35,17 @@ namespace Kostassoid.Nerve.EventStore.Specs
 			private Cleanup after = () =>
 			{
 				_store.Dispose();
-				EventBus.Reset();
+				DomainBus.Reset();
 			};
 
 			private Establish context = () =>
 			{
 				_store = new EventStore(new InMemoryEventStorage());
-				EventBus.OnStream().Of<UncommitedEventStream>().ReactWith(_store);
+				DomainBus.OnStream().Of<UncommitedEventStream>().ReactWith(_store);
 
 				_id = Guid.NewGuid();
 				var user = User.Create(_id, "Joe", 33);
-				user.Commit().Wait();
+				user.Flush().Wait();
 			};
 
 			private Because of = () =>
@@ -75,22 +75,22 @@ namespace Kostassoid.Nerve.EventStore.Specs
 			private Cleanup after = () =>
 			{
 				_store.Dispose();
-				EventBus.Reset();
+				DomainBus.Reset();
 			};
 
 			private Establish context = () =>
 			{
 				_store = new EventStore(new InMemoryEventStorage());
-				EventBus.OnStream().Of<UncommitedEventStream>().ReactWith(_store);
+				DomainBus.OnStream().Of<UncommitedEventStream>().ReactWith(_store);
 
 				_id = Guid.NewGuid();
 				var user = User.Create(_id, "Joe", 33);
-				user.Commit().Wait();
+				user.Flush().Wait();
 
 				user = _store.Load<User>(_id);
 				user.ChangeName("Bill");
 				user.Birthday();
-				user.Commit().Wait();
+				user.Flush().Wait();
 			};
 
 			private Because of = () =>

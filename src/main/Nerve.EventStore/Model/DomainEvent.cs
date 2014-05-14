@@ -34,7 +34,7 @@ namespace Kostassoid.Nerve.EventStore.Model
 			Happened = DateTime.UtcNow;
 		}
 
-		protected DomainEvent(AggregateRoot root) : this(root.GetType().Name, root.Id, root.Version)
+		protected DomainEvent(IAggregateRoot root) : this(root.GetType().Name, root.Id, root.Version)
 		{
 		}
 	}

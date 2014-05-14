@@ -17,9 +17,8 @@ namespace Kostassoid.Nerve.EventStore.Model
 	using System.Collections.Generic;
 	using System.Reflection;
 	using System.Threading;
-	using System.Threading.Tasks;
 
-	public abstract class AggregateRoot
+	public abstract class AggregateRoot : IAggregateRoot
 	{
 		private IList<IDomainEvent> _uncommited = new List<IDomainEvent>();
 
@@ -52,11 +51,10 @@ namespace Kostassoid.Nerve.EventStore.Model
 			}
 		}
 
-		public Task Commit()
+		public UncommitedEventStream Flush()
 		{
 			var toCommit = Interlocked.Exchange(ref _uncommited, new List<IDomainEvent>());
-
-			return EventBus.RaiseWithTask(new UncommitedEventStream(this, toCommit));
+			return new UncommitedEventStream(this, toCommit);
 		}
 	}
 }

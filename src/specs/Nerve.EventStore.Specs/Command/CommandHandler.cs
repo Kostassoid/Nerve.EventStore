@@ -23,7 +23,7 @@
 			Console.WriteLine("Creating user {0}.", signal.Payload.Name);
 
 			var user = User.Create(signal.Payload.Id, signal.Payload.Name, signal.Payload.Age);
-			user.Commit().Wait();
+			user.Flush().Wait();
 		}
 
 		void ChangeUserNameHandler(ISignal<ChangeUserName> signal)
@@ -32,7 +32,7 @@
 
 			var user = _store.Load<User>(signal.Payload.Id);
 			user.ChangeName(signal.Payload.NewName);
-			user.Commit().Wait();
+			user.Flush().Wait();
 		}
 
 		public override bool OnFailure(SignalException exception)

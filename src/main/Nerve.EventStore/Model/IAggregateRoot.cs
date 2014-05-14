@@ -11,36 +11,17 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 
-namespace Kostassoid.Nerve.EventStore
+namespace Kostassoid.Nerve.EventStore.Model
 {
-	using System.Threading.Tasks;
-	using Core;
-	using Core.Tpl;
+	using System;
 
-	public static class EventBus
+	public interface IAggregateRoot
 	{
-		static ICell _cell = new Cell("EventBus");
+		Guid Id { get; }
+		long Version { get; }
 
-		public static ILinkJunction OnStream()
-		{
-			return _cell.OnStream();
-		}
+		void Apply(IDomainEvent ev, bool isReplaying = false);
 
-		public static void Raise<T>(T ev) where T : class
-		{
-			_cell.Send(ev);
-		}
-
-		public static Task RaiseWithTask<T>(T ev) where T : class
-		{
-			return _cell.SendFor<object>(ev);
-		}
-
-		public static void Reset()
-		{
-			var tmp = _cell;
-			_cell = new Cell("EventBus");
-			tmp.Dispose();
-		}
+		UncommitedEventStream Flush();
 	}
 }

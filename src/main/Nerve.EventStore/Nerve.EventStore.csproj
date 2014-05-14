@@ -52,10 +52,14 @@
     </Compile>
     <Compile Include="AggregateIdentity.cs" />
     <Compile Include="Command\ICommand.cs" />
+    <Compile Include="EventStoreConfiguration.cs" />
+    <Compile Include="IEventStoreConfigurator.cs" />
+    <Compile Include="EventStoreProcessor.cs" />
     <Compile Include="IEventStore.cs" />
-    <Compile Include="EventBus.cs" />
+    <Compile Include="DomainBus.cs" />
     <Compile Include="EventStore.cs" />
     <Compile Include="Model\AggregateRoot.cs" />
+    <Compile Include="Model\IAggregateRoot.cs" />
     <Compile Include="Model\DomainEvent.cs" />
     <Compile Include="Model\IDomainEvent.cs" />
     <Compile Include="Model\UncommitedEventStream.cs" />
@@ -65,6 +69,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Tools\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

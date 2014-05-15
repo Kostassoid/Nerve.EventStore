@@ -14,13 +14,13 @@
 namespace Kostassoid.Nerve.EventStore
 {
 	using System;
-	using Core;
+	using System.Threading.Tasks;
 	using Model;
 
 	public interface IEventStore
 	{
-		T Load<T>(Guid id) where T : AggregateRoot;
+		Task<T> Load<T>(Guid id) where T : IAggregateRoot;
 
-		void ProcessUncommited(ISignal<UncommitedEventStream> uncommited);
+		Task Commit(IAggregateRoot root);
 	}
 }

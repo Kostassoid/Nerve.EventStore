@@ -1,4 +1,4 @@
-﻿// Copyright 2014 https://github.com/Kostassoid/Nerve.EventStore
+// Copyright 2014 https://github.com/Kostassoid/Nerve.EventStore
 //   
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,35 +14,105 @@
 namespace Kostassoid.Nerve.EventStore
 {
 	using System;
-	using System.Threading;
+	using System.Collections.Generic;
+	using System.Linq;
+	using System.Linq.Expressions;
+	using System.Reflection;
 	using System.Threading.Tasks;
+	using Core;
 	using Core.Processing.Operators;
+	using Core.Scheduling;
+	using Core.Tpl;
 	using Model;
+	using Storage;
 
-	public class EventStore
+	public class EventStore : Cell, IEventStore
 	{
-		EventStoreProcessor _processor;
-		Action _unsubscribeAction = () => {};
+		readonly IEventStorage _storage;
 
-		public void Configure(Action<IEventStoreConfigurator> configAction)
+		public EventStore(IEventStorage storage) : base("EventStoreProcessor", ThreadScheduler.Factory)
 		{
-			var configuration = new EventStoreConfiguration();
-			configAction(configuration);
+			_storage = storage;
 
-			_unsubscribeAction();
+			OnStream().Of<UncommitedEventStream>().ReactWith(ProcessUncommited);
+			OnStream().Of<AggregateIdentity>().ReactWith(Load);
+		}
 
-			var processor = new EventStoreProcessor(configuration.Storage);
-			var unsubscribe = configuration.Source.OnStream().Of<UncommitedEventStream>().ReactWith(DomainBus.Cell);
-			_unsubscribeAction = unsubscribe.Dispose;
+		void Load(ISignal<AggregateIdentity> signal)
+		{
+			signal.Return(InternalLoad(signal.Payload.Type, signal.Payload.Id));
+		}
 
-			Interlocked
-				.Exchange(ref _processor, processor)
-				.Dispose();
+		void ProcessUncommited(ISignal<UncommitedEventStream> uncommited)
+		{
+			var root = uncommited.Payload.Root;
+			var loaded = _storage.Load(root.GetType(), root.Id).ToList();
+			var sorted = uncommited.Payload.UncommitedEvents.OrderBy(e => e.Version);
+			var commited = new List<IDomainEvent>();
+
+			var currentVersion = loaded.Any() ? loaded.Last().Version + 1 : 0;
+			foreach (var ev in sorted)
+			{
+				if (currentVersion != ev.Version)
+				{
+					throw new ConcurrencyException(
+						string.Format("Expected version of {0} ({1}) to be {2} but got {3}."
+							, ev.Type, ev.Id, currentVersion, ev.Version));
+				}
+
+				loaded.Add(ev);
+				commited.Add(ev);
+				currentVersion++;
+			}
+
+			if (loaded.Any())
+			{
+				_storage.Save(root.GetType(), root.Id, loaded);
+			}
+
+			uncommited.Return(uncommited.Payload.UncommitedEvents);
+		}
+
+		private IAggregateRoot InternalLoad(Type type, Guid id)
+		{
+			var loaded = _storage.Load(type, id).ToList();
+			if (!loaded.Any())
+			{
+				throw new InvalidOperationException(string.Format("Aggregate root of type {0} with id {1} not found.", type.Name, id));
+			}
+
+			var root = (IAggregateRoot)ConstructInstanceOf(type);
+			foreach (var ev in loaded)
+			{
+				root.Apply(ev, true);
+			}
+
+			return root;
+		}
+
+		//TODO: extract
+		private static IDictionary<Type, Func<object>> _builders = new Dictionary<Type, Func<object>>(); 
+		private static object ConstructInstanceOf(Type type)
+		{
+			Func<object> builder;
+			if (!_builders.TryGetValue(type, out builder))
+			{
+				builder = Expression.Lambda<Func<object>>(Expression.New(type)).Compile();
+				_builders[type] = builder;
+			}
+
+			return builder();
 		}
 
 		public Task Commit(IAggregateRoot root)
 		{
-			return DomainBus.RaiseWithTask(root.Flush());
+			return this.SendFor<object>(root.Flush());
 		}
+
+		public Task<T> Load<T>(Guid id) where T : IAggregateRoot
+		{
+			return this.SendFor<T>(new AggregateIdentity(typeof(T), id));
+		}
+
 	}
 }

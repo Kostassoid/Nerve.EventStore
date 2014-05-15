@@ -8,9 +8,9 @@
 
 	public class CommandHandler : Cell
 	{
-		readonly EventStore _store;
+		readonly IEventStore _store;
 
-		public CommandHandler(EventStore store) : base("CommandHandler", ThreadScheduler.Factory)
+		public CommandHandler(IEventStore store) : base("CommandHandler", ThreadScheduler.Factory)
 		{
 			_store = store;
 
@@ -23,16 +23,16 @@
 			Console.WriteLine("Creating user {0}.", signal.Payload.Name);
 
 			var user = User.Create(signal.Payload.Id, signal.Payload.Name, signal.Payload.Age);
-			user.Flush().Wait();
+			_store.Commit(user).Wait();
 		}
 
 		void ChangeUserNameHandler(ISignal<ChangeUserName> signal)
 		{
 			Console.WriteLine("Changing user name to {0}.", signal.Payload.NewName);
 
-			var user = _store.Load<User>(signal.Payload.Id);
+			var user = _store.Load<User>(signal.Payload.Id).Result;
 			user.ChangeName(signal.Payload.NewName);
-			user.Flush().Wait();
+			_store.Commit(user).Wait();
 		}
 
 		public override bool OnFailure(SignalException exception)

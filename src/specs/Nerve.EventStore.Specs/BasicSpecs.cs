@@ -14,10 +14,8 @@
 namespace Kostassoid.Nerve.EventStore.Specs
 {
 	using System;
-	using Core.Processing.Operators;
 	using Machine.Specifications;
 	using Model;
-	using Nerve.EventStore.Model;
 
 	// ReSharper disable InconsistentNaming
 	// ReSharper disable UnusedMember.Local
@@ -32,25 +30,20 @@ namespace Kostassoid.Nerve.EventStore.Specs
 			private static Guid _id;
 			private static User _loaded;
 
-			private Cleanup after = () =>
-			{
-				_store.Dispose();
-				DomainBus.Reset();
-			};
+			private Cleanup after = () => _store.Dispose();
 
 			private Establish context = () =>
 			{
 				_store = new EventStore(new InMemoryEventStorage());
-				DomainBus.OnStream().Of<UncommitedEventStream>().ReactWith(_store);
 
 				_id = Guid.NewGuid();
 				var user = User.Create(_id, "Joe", 33);
-				user.Flush().Wait();
+				_store.Commit(user).Wait();
 			};
 
 			private Because of = () =>
 			{
-				_loaded = _store.Load<User>(_id);
+				_loaded = _store.Load<User>(_id).Result;
 			};
 
 			private It should_not_be_null = () => _loaded.ShouldNotBeNull();
@@ -72,30 +65,25 @@ namespace Kostassoid.Nerve.EventStore.Specs
 			private static Guid _id;
 			private static User _loaded;
 
-			private Cleanup after = () =>
-			{
-				_store.Dispose();
-				DomainBus.Reset();
-			};
+			private Cleanup after = () => _store.Dispose();
 
 			private Establish context = () =>
 			{
 				_store = new EventStore(new InMemoryEventStorage());
-				DomainBus.OnStream().Of<UncommitedEventStream>().ReactWith(_store);
 
 				_id = Guid.NewGuid();
 				var user = User.Create(_id, "Joe", 33);
-				user.Flush().Wait();
+				_store.Commit(user).Wait();
 
-				user = _store.Load<User>(_id);
+				user = _store.Load<User>(_id).Result;
 				user.ChangeName("Bill");
 				user.Birthday();
-				user.Flush().Wait();
+				_store.Commit(user).Wait();
 			};
 
 			private Because of = () =>
 			{
-				_loaded = _store.Load<User>(_id);
+				_loaded = _store.Load<User>(_id).Result;
 			};
 
 			private It should_not_be_null = () => _loaded.ShouldNotBeNull();

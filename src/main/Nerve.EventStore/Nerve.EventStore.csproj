@@ -52,12 +52,9 @@
     </Compile>
     <Compile Include="AggregateIdentity.cs" />
     <Compile Include="Command\ICommand.cs" />
-    <Compile Include="EventStoreConfiguration.cs" />
-    <Compile Include="IEventStoreConfigurator.cs" />
-    <Compile Include="EventStoreProcessor.cs" />
-    <Compile Include="IEventStore.cs" />
-    <Compile Include="DomainBus.cs" />
+    <Compile Include="ConcurrencyException.cs" />
     <Compile Include="EventStore.cs" />
+    <Compile Include="IEventStore.cs" />
     <Compile Include="Model\AggregateRoot.cs" />
     <Compile Include="Model\IAggregateRoot.cs" />
     <Compile Include="Model\DomainEvent.cs" />

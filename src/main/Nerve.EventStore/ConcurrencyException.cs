@@ -13,42 +13,12 @@
 
 namespace Kostassoid.Nerve.EventStore
 {
-	using System.Threading;
-	using System.Threading.Tasks;
-	using Core;
-	using Core.Tpl;
+	using System;
 
-	public static class DomainBus
+	public class ConcurrencyException : Exception
 	{
-		const string Name = "DomainBus";
-
-		static ICell _cell = new Cell(Name);
-
-		public static ICell Cell
+		public ConcurrencyException(string message) : base(message)
 		{
-			get { return _cell; }
-		}
-
-		public static ILinkJunction OnStream()
-		{
-			return _cell.OnStream();
-		}
-
-		public static void Raise<T>(T ev) where T : class
-		{
-			_cell.Send(ev);
-		}
-
-		public static Task RaiseWithTask<T>(T ev) where T : class
-		{
-			return _cell.SendFor<object>(ev);
-		}
-
-		public static void Reset()
-		{
-			Interlocked
-				.Exchange(ref _cell, new Cell(Name))
-				.Dispose();
 		}
 	}
 }

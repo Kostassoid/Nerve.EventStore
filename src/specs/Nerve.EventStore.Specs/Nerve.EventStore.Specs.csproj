@@ -60,6 +60,7 @@
     <Compile Include="Command\ChangeUserName.cs" />
     <Compile Include="Command\CommandHandler.cs" />
     <Compile Include="Command\CreateUser.cs" />
+    <Compile Include="PerformanceSpecs.cs" />
     <Compile Include="InMemoryEventStorage.cs" />
     <Compile Include="Model\UserAgeChanged.cs" />
     <Compile Include="Model\User.cs" />

@@ -32,6 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Fasterflect">
+      <HintPath>..\..\packages\fasterflect.2.1.3\lib\net40\Fasterflect.dll</HintPath>
+    </Reference>
     <Reference Include="Nerve.Core">
       <HintPath>..\..\packages\Nerve.Core.0.7.0.0\lib\net40\Nerve.Core.dll</HintPath>
     </Reference>
@@ -51,11 +54,15 @@
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="AggregateIdentity.cs" />
+    <Compile Include="ApplyMethodDelegate.cs" />
     <Compile Include="Command\ICommand.cs" />
     <Compile Include="ConcurrencyException.cs" />
+    <Compile Include="DefaultApplyMethodResolver.cs" />
     <Compile Include="EventStore.cs" />
+    <Compile Include="IApplyMethodResolver.cs" />
     <Compile Include="IEventStore.cs" />
     <Compile Include="Model\AggregateRoot.cs" />
+    <Compile Include="Model\DomainSettings.cs" />
     <Compile Include="Model\IAggregateRoot.cs" />
     <Compile Include="Model\DomainEvent.cs" />
     <Compile Include="Model\IDomainEvent.cs" />
@@ -63,13 +70,17 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Storage\IEventStorage.cs" />
     <Compile Include="Storage\JsonFileEventStorage.cs" />
+    <Compile Include="Tools\CodeContracts\Assumes.cs" />
+    <Compile Include="Tools\CodeContracts\Requires.cs" />
+    <Compile Include="Tools\EnumerableEx.cs" />
+    <Compile Include="Tools\FastInvoker.cs" />
+    <Compile Include="Tools\MemoizedFunc.cs" />
+    <Compile Include="Tools\TypeHelpers.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Tools\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

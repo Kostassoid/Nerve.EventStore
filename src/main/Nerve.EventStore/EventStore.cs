@@ -16,8 +16,6 @@ namespace Kostassoid.Nerve.EventStore
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using System.Linq.Expressions;
-	using System.Reflection;
 	using System.Threading.Tasks;
 	using Core;
 	using Core.Processing.Operators;
@@ -25,12 +23,13 @@ namespace Kostassoid.Nerve.EventStore
 	using Core.Tpl;
 	using Model;
 	using Storage;
+	using Tools;
 
 	public class EventStore : Cell, IEventStore
 	{
 		readonly IEventStorage _storage;
 
-		public EventStore(IEventStorage storage) : base("EventStoreProcessor", ThreadScheduler.Factory)
+		public EventStore(IEventStorage storage) : base("EventStore", ThreadScheduler.Factory)
 		{
 			_storage = storage;
 
@@ -81,27 +80,13 @@ namespace Kostassoid.Nerve.EventStore
 				throw new InvalidOperationException(string.Format("Aggregate root of type {0} with id {1} not found.", type.Name, id));
 			}
 
-			var root = (IAggregateRoot)ConstructInstanceOf(type);
+			var root = (IAggregateRoot)TypeHelpers.New(type);
 			foreach (var ev in loaded)
 			{
 				root.Apply(ev, true);
 			}
 
 			return root;
-		}
-
-		//TODO: extract
-		private static IDictionary<Type, Func<object>> _builders = new Dictionary<Type, Func<object>>(); 
-		private static object ConstructInstanceOf(Type type)
-		{
-			Func<object> builder;
-			if (!_builders.TryGetValue(type, out builder))
-			{
-				builder = Expression.Lambda<Func<object>>(Expression.New(type)).Compile();
-				_builders[type] = builder;
-			}
-
-			return builder();
 		}
 
 		public Task Commit(IAggregateRoot root)
@@ -113,6 +98,5 @@ namespace Kostassoid.Nerve.EventStore
 		{
 			return this.SendFor<T>(new AggregateIdentity(typeof(T), id));
 		}
-
 	}
 }

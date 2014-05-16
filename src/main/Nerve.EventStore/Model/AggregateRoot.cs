@@ -15,7 +15,6 @@ namespace Kostassoid.Nerve.EventStore.Model
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Reflection;
 	using System.Threading;
 
 	public abstract class AggregateRoot : IAggregateRoot
@@ -37,11 +36,7 @@ namespace Kostassoid.Nerve.EventStore.Model
 
 		public void Apply(IDomainEvent ev, bool isReplaying = false)
 		{
-			//TODO: cache
-			GetType().InvokeMember(
-				"On" + ev.GetType().Name,
-				BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.InvokeMethod,
-				null, this, new object[] { ev });
+			DomainSettings.Apply(this, ev);
 
 			Version++;
 

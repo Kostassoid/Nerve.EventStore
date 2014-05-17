@@ -17,12 +17,14 @@ namespace Kostassoid.Nerve.EventStore.Storage
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Text;
+	using System.Threading.Tasks;
 	using Model;
 	using Newtonsoft.Json;
 
 	public class JsonFileEventStorage : IEventStorage
 	{
 		readonly DirectoryInfo _folder;
+		readonly object _sync = new object();
 
 		public JsonFileEventStorage(string folderName)
 		{
@@ -31,30 +33,49 @@ namespace Kostassoid.Nerve.EventStore.Storage
 			ClearStorageFolder(_folder);
 		}
 
-		static void ClearStorageFolder(DirectoryInfo folder)
+		void ClearStorageFolder(DirectoryInfo folder)
 		{
-			folder.Delete(true);
-			folder.Create();
+			lock (_sync)
+			{
+				folder.Delete(true);
+				folder.Create();
+			}
 		}
 
-		public IEnumerable<IDomainEvent> Load(Type type, Guid id)
+		public Task<IEnumerable<IDomainEvent>> Load(Type type, Guid id)
 		{
 			var path = GetFilePathFor(type.Name, id);
-			if (!File.Exists(path))
+			string contents;
+
+			lock (_sync)
 			{
-				return new List<IDomainEvent>();
+				if (!File.Exists(path))
+				{
+					return new List<IDomainEvent>();
+				}
+				contents = File.ReadAllText(path, Encoding.UTF8);
 			}
 
-			var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto };
-			return (IEnumerable<IDomainEvent>)JsonConvert.DeserializeObject(File.ReadAllText(path, Encoding.UTF8), typeof(IEnumerable<IDomainEvent>), settings);
+			var settings = new JsonSerializerSettings
+						   {
+							   TypeNameHandling = TypeNameHandling.Auto
+						   };
+			return (IEnumerable<IDomainEvent>)JsonConvert.DeserializeObject(contents, typeof(IEnumerable<IDomainEvent>), settings);
 		}
 
 		public void Save(Type type, Guid id, IEnumerable<IDomainEvent> events)
 		{
 			var path = GetFilePathFor(type.Name, id);
 
-			var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto, Formatting = Formatting.Indented };
-			File.WriteAllText(path, JsonConvert.SerializeObject(events, settings));
+			lock (_sync)
+			{
+				var settings = new JsonSerializerSettings
+							   {
+								   TypeNameHandling = TypeNameHandling.Auto,
+								   Formatting = Formatting.Indented
+							   };
+				File.WriteAllText(path, JsonConvert.SerializeObject(events, settings));
+			}
 		}
 
 		private string GetFilePathFor(string type, Guid id)

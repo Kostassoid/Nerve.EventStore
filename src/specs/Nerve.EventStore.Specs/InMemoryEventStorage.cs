@@ -1,30 +1,49 @@
 ﻿namespace Kostassoid.Nerve.EventStore.Specs
 {
 	using System;
+	using System.Collections.Concurrent;
 	using System.Collections.Generic;
 	using System.Linq;
-	using Nerve.EventStore.Model;
 	using Storage;
 
 	public class InMemoryEventStorage : IEventStorage
     {
-		private readonly IDictionary<Guid, IList<IDomainEvent>> _storage =
-			new Dictionary<Guid, IList<IDomainEvent>>(); 
+		private readonly IDictionary<Guid, IList<Commit>> _storage =
+			new ConcurrentDictionary<Guid, IList<Commit>>();
 
-		public IEnumerable<IDomainEvent> Load(Type type, Guid id)
+		public Commit LoadLast(Guid id)
 		{
-			IList<IDomainEvent> events;
-			if (!_storage.TryGetValue(id, out events))
+			IList<Commit> commits;
+			if (!_storage.TryGetValue(id, out commits))
 			{
-				return new IDomainEvent[0];
+				return null;
 			}
-
-			return events;
+			
+			return commits.Last();
 		}
 
-		public void Save(Type type, Guid id, IEnumerable<IDomainEvent> events)
+		public IEnumerable<Commit> LoadSince(Guid id, long startingId)
 		{
-			_storage[id] = events.ToList();
+			IList<Commit> commits;
+			if (!_storage.TryGetValue(id, out commits))
+			{
+				return null;
+			}
+
+			return commits.Skip((int)startingId);
+		}
+
+		public void Store(Commit commit)
+		{
+			IList<Commit> commits;
+			if (!_storage.TryGetValue(commit.TargetId, out commits))
+			{
+				commits = new List<Commit>();
+			}
+
+			commits.Add(commit);
+
+			_storage[commit.TargetId] = commits;
 		}
     }
 }

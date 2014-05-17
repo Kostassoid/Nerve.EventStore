@@ -15,11 +15,12 @@ namespace Kostassoid.Nerve.EventStore.Storage
 {
 	using System;
 	using System.Collections.Generic;
-	using Model;
+	using System.Threading.Tasks;
 
 	public interface IEventStorage
 	{
-		IEnumerable<IDomainEvent> Load(Type type, Guid id);
-		void Save(Type type, Guid id, IEnumerable<IDomainEvent> events);
+		Commit LoadLast(Guid id);
+		IEnumerable<Commit> LoadSince(Guid id, long startingId);
+		void Store(Commit commit);
 	}
 }

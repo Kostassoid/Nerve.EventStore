@@ -28,7 +28,7 @@ namespace Kostassoid.Nerve.EventStore.Specs
 		[Tags("Unit")]
 		public class when_heavy_working_with_several_aggregates
 		{
-			const int TotalOps = 10000;
+			const int TotalOps = 20000;
 
 			static EventStore _store;
 
@@ -52,6 +52,7 @@ namespace Kostassoid.Nerve.EventStore.Specs
 
 			private Because of = () =>
 			{
+
 				var r = new Random();
 
 				var stopwatch = Stopwatch.StartNew();
@@ -59,9 +60,13 @@ namespace Kostassoid.Nerve.EventStore.Specs
 				var tasks = Enumerable.Range(0, TotalOps)
 					.Select(_ => Task.Factory.StartNew(() =>
 					{
-						var user = _store.Load<User>(_ids[r.Next(10)]).Result;
+						var id = _ids[r.Next(10)];
+/*
+						var user = _store.Load<User>(id).Result;
 						user.Birthday();
-						_store.Commit(user).Wait();
+						_store.Commit(user); //.Wait();
+*/
+						_store.OnLoaded<User>(id, u => u.Birthday()).Wait();
 					})).ToArray();
 
 				try

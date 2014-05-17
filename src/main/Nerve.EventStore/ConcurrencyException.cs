@@ -14,10 +14,13 @@
 namespace Kostassoid.Nerve.EventStore
 {
 	using System;
+	using Model;
 
 	public class ConcurrencyException : Exception
 	{
-		public ConcurrencyException(string message) : base(message)
+		public ConcurrencyException(long currentVersion, IDomainEvent conflictEvent)
+			: base(string.Format("Expected version of {0} ({1}) to be {2} but got {3}."
+			, conflictEvent.Type, conflictEvent.Id, currentVersion, conflictEvent.Version))
 		{
 		}
 	}

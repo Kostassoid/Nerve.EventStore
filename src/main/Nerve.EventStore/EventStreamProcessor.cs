@@ -1,5 +1,6 @@
 namespace Kostassoid.Nerve.EventStore
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 	using Core;
@@ -12,24 +13,25 @@ namespace Kostassoid.Nerve.EventStore
 	{
 		readonly IEventStorage _storage;
 
-		public EventStreamProcessor(IEventStorage storage) : base("EventStoreProcessor", PoolScheduler.Factory)
+		public EventStreamProcessor(IEventStorage storage) : base("EventStoreProcessor", ThreadScheduler.Factory)
 		{
 			_storage = storage;
 
-			OnStream().Cast<IAggregateRoot>().ReactWith(ProcessUncommited); //TODO: use Of<>
+			OnStream().Of<UncommitedEventStream>().ReactWith(ProcessUncommited);
 		}
 
-		void ProcessUncommited(ISignal<IAggregateRoot> signal)
+		void ProcessUncommited(ISignal<UncommitedEventStream> signal)
 		{
-			var root = signal.Payload;
-			var uncommited = root.Flush();
-			if (!uncommited.UncommitedEvents.Any())
+			var uncommited = signal.Payload;
+			var root = uncommited.Root;
+			if (!uncommited.Events.Any())
 			{
 				signal.Return(new IDomainEvent[0]);
+				return;
 			}
 
 			var last = _storage.LoadLast(root.Id);
-			var toCommit = uncommited.UncommitedEvents;
+			var toCommit = uncommited.Events;
 			var commited = new List<IDomainEvent>();
 
 			var targetVersion = last != null ? last.TargetVersion + last.Events.Count : 0;
@@ -57,7 +59,7 @@ namespace Kostassoid.Nerve.EventStore
 				_storage.Store(commit);
 			}
 
-			signal.Return(uncommited.UncommitedEvents);
+			signal.Return(uncommited.Events);
 		}
 	}
 }

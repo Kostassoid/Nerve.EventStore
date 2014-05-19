@@ -71,7 +71,7 @@ namespace Kostassoid.Nerve.EventStore
 			//return this.SendFor<object>(root.Flush());
 
 			var p = Math.Abs(root.Id.GetHashCode() % 4);
-			return _processors[p].SendFor<object>(root);
+			return _processors[p].SendFor<object>(root.Flush());
 		}
 
 		public Task<T> Load<T>(Guid id) where T : IAggregateRoot

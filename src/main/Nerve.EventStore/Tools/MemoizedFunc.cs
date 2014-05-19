@@ -14,7 +14,7 @@
 namespace Kostassoid.Nerve.EventStore.Tools
 {
 	using System;
-	using System.Collections.Generic;
+	using System.Collections.Concurrent;
 
 	internal static class MemoizedFunc
     {
@@ -52,48 +52,28 @@ namespace Kostassoid.Nerve.EventStore.Tools
 
         public static Func<TSource, TReturn> AsMemoized<TSource, TReturn>(this Func<TSource, TReturn> func)
         {
-            var cache = new Dictionary<TSource, TReturn>();
-            return s =>
-            {
-                lock(func)
-                if (!cache.ContainsKey(s))
-                {
-                    cache[s] = func(s);
-                }
-                return cache[s];
-            };
-        }
+			var cache = new ConcurrentDictionary<TSource, TReturn>();
+			return s => cache.GetOrAdd(s, _ => func(s));
+		}
 
         public static Func<TSource1, TSource2, TReturn> AsMemoized<TSource1, TSource2, TReturn>(this Func<TSource1, TSource2, TReturn> func)
         {
-            var cache = new Dictionary<Tuple<TSource1, TSource2>, TReturn>();
-            return (s1, s2) =>
-            {
-                var key = new Tuple<TSource1, TSource2>(s1, s2);
-
-                lock (func)
-                if (!cache.ContainsKey(key))
-                {
-                    cache[key] = func(s1, s2);
-                }
-                return cache[key];
-            };
-        }
+			var cache = new ConcurrentDictionary<Tuple<TSource1, TSource2>, TReturn>();
+			return (s1, s2) =>
+			{
+				var key = Tuple.Create(s1, s2);
+				return cache.GetOrAdd(key, _ => func(s1, s2));
+			};
+		}
 
         public static Func<TSource1, TSource2, TSource3, TReturn> AsMemoized<TSource1, TSource2, TSource3, TReturn>(this Func<TSource1, TSource2, TSource3, TReturn> func)
         {
-            var cache = new Dictionary<Tuple<TSource1, TSource2, TSource3>, TReturn>();
-            return (s1, s2, s3) =>
-            {
-                var key = new Tuple<TSource1, TSource2, TSource3>(s1, s2, s3);
-
-                lock (func)
-                if (!cache.ContainsKey(key))
-                {
-                    cache[key] = func(s1, s2, s3);
-                }
-                return cache[key];
-            };
+			var cache = new ConcurrentDictionary<Tuple<TSource1, TSource2, TSource3>, TReturn>();
+			return (s1, s2, s3) =>
+			{
+				var key = Tuple.Create(s1, s2, s3);
+				return cache.GetOrAdd(key, _ => func(s1, s2, s3));
+			};
         }
     }
 }

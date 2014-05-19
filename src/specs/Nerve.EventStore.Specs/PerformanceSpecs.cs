@@ -28,7 +28,7 @@ namespace Kostassoid.Nerve.EventStore.Specs
 		[Tags("Unit")]
 		public class when_heavy_working_with_several_aggregates
 		{
-			const int TotalOps = 20000;
+			const int TotalOps = 30000;
 
 			static EventStore _store;
 
@@ -61,12 +61,11 @@ namespace Kostassoid.Nerve.EventStore.Specs
 					.Select(_ => Task.Factory.StartNew(() =>
 					{
 						var id = _ids[r.Next(10)];
-/*
+
 						var user = _store.Load<User>(id).Result;
 						user.Birthday();
-						_store.Commit(user); //.Wait();
-*/
-						_store.OnLoaded<User>(id, u => u.Birthday()).Wait();
+						_store.Commit(user).Wait();
+						//_store.OnLoaded<User>(id, u => u.Birthday()).Wait();
 					})).ToArray();
 
 				try

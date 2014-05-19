@@ -18,12 +18,12 @@ namespace Kostassoid.Nerve.EventStore.Model
 	public class UncommitedEventStream
 	{
 		public IAggregateRoot Root { get; private set; }
-		public IList<IDomainEvent> UncommitedEvents { get; private set; }
+		public IList<IDomainEvent> Events { get; private set; }
 
-		public UncommitedEventStream(IAggregateRoot root, IList<IDomainEvent> uncommitedEvents)
+		public UncommitedEventStream(IAggregateRoot root, IList<IDomainEvent> events)
 		{
 			Root = root;
-			UncommitedEvents = uncommitedEvents;
+			Events = events;
 		}
 	}
 }

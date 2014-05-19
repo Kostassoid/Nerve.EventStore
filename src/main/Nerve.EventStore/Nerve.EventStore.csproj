@@ -59,6 +59,7 @@
     <Compile Include="ConcurrencyException.cs" />
     <Compile Include="DefaultApplyMethodResolver.cs" />
     <Compile Include="EventStore.cs" />
+    <Compile Include="EventStreamProcessor.cs" />
     <Compile Include="IApplyMethodResolver.cs" />
     <Compile Include="IEventStore.cs" />
     <Compile Include="Model\AggregateRoot.cs" />

@@ -25,50 +25,24 @@ namespace Kostassoid.Nerve.EventStore
 	using Storage;
 	using Tools;
 
-	public class EventStore : Cell, IEventStore
+	public class EventStore : /*Cell, */IEventStore, IDisposable
 	{
 		readonly IEventStorage _storage;
+		readonly IList<EventStreamProcessor> _processors; 
 
-		public EventStore(IEventStorage storage) : base("EventStore", ThreadScheduler.Factory)
+		public EventStore(IEventStorage storage)// : base("EventStore", ThreadScheduler.Factory)
 		{
 			_storage = storage;
 
-			OnStream().Of<UncommitedEventStream>().ReactWith(ProcessUncommited);
-		}
+			_processors = Enumerable.Range(0, 4).Select(_ => new EventStreamProcessor(_storage)).ToList();
 
-		void ProcessUncommited(ISignal<UncommitedEventStream> uncommited)
-		{
-			var root = uncommited.Payload.Root;
-			var last = _storage.LoadLast(root.Id);
-			var toCommit = uncommited.Payload.UncommitedEvents;
-			var commited = new List<IDomainEvent>();
-
-			var targetVersion = last != null ? last.TargetVersion + last.Events.Count : 0;
-			var currentVersion = targetVersion;
-			foreach (var ev in toCommit)
+/*
+			OnStream().Of<UncommitedEventStream>().ReactWith(s =>
 			{
-				if (currentVersion != ev.Version)
-				{
-					throw new ConcurrencyException(currentVersion, ev);
-				}
-
-				commited.Add(ev);
-				currentVersion++;
-			}
-
-			if (commited.Any())
-			{
-				var commit = new Commit(
-					last != null ? last.Id + 1 : 0,
-					root.Id,
-					targetVersion,
-					commited
-					);
-
-				_storage.Store(commit);
-			}
-
-			uncommited.Return(uncommited.Payload.UncommitedEvents);
+				var p = Math.Abs(s.Payload.Root.Id.GetHashCode()%4);
+				s.Return(_processors[p].SendFor<object>(s.Payload).Result);
+			});
+*/
 		}
 
 		private IAggregateRoot InternalLoad(Type type, Guid id)
@@ -94,7 +68,10 @@ namespace Kostassoid.Nerve.EventStore
 
 		public Task Commit(IAggregateRoot root)
 		{
-			return this.SendFor<object>(root.Flush());
+			//return this.SendFor<object>(root.Flush());
+
+			var p = Math.Abs(root.Id.GetHashCode() % 4);
+			return _processors[p].SendFor<object>(root);
 		}
 
 		public Task<T> Load<T>(Guid id) where T : IAggregateRoot
@@ -109,6 +86,16 @@ namespace Kostassoid.Nerve.EventStore
 			var root = InternalLoad(typeof (T), id);
 			action((T) root);
 			return Commit(root);
+		}
+
+		public/* override*/ void Dispose(/*bool isDisposing*/)
+		{
+			foreach (var processor in _processors)
+			{
+				processor.Dispose();
+			}
+
+			//base.Dispose(isDisposing);
 		}
 	}
 }

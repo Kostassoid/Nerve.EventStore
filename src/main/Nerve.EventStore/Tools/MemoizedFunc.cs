@@ -20,45 +20,25 @@ namespace Kostassoid.Nerve.EventStore.Tools
     {
         public static Func<TResult> From<TResult>(Func<TResult> func)
         {
-            return func.AsMemoized();
-        }
+			object cache = null;
+			return () =>
+			{
+				if (cache == null)
+					cache = func();
 
-        public static Func<TSource, TReturn> From<TSource, TReturn>(Func<TSource, TReturn> func)
+				return (TResult)cache;
+			};
+		}
+
+		public static Func<TArg, TResult> From<TArg, TResult>(Func<TArg, TResult> func)
         {
-            return func.AsMemoized();
-        }
-
-        public static Func<TSource1, TSource2, TReturn> From<TSource1, TSource2, TReturn>(Func<TSource1, TSource2, TReturn> func)
-        {
-            return func.AsMemoized();
-        }
-
-        public static Func<TSource1, TSource2, TSource3, TReturn> From<TSource1, TSource2, TSource3, TReturn>(Func<TSource1, TSource2, TSource3, TReturn> func)
-        {
-            return func.AsMemoized();
-        }
-
-        public static Func<TReturn> AsMemoized<TReturn>(this Func<TReturn> func)
-        {
-            object cache = null;
-            return () =>
-            {
-                if (cache == null)
-                    cache = func();
-
-                return (TReturn)cache;
-            };
-        }
-
-        public static Func<TSource, TReturn> AsMemoized<TSource, TReturn>(this Func<TSource, TReturn> func)
-        {
-			var cache = new ConcurrentDictionary<TSource, TReturn>();
+			var cache = new ConcurrentDictionary<TArg, TResult>();
 			return s => cache.GetOrAdd(s, _ => func(s));
 		}
 
-        public static Func<TSource1, TSource2, TReturn> AsMemoized<TSource1, TSource2, TReturn>(this Func<TSource1, TSource2, TReturn> func)
+        public static Func<TArg1, TArg2, TResult> From<TArg1, TArg2, TResult>(Func<TArg1, TArg2, TResult> func)
         {
-			var cache = new ConcurrentDictionary<Tuple<TSource1, TSource2>, TReturn>();
+			var cache = new ConcurrentDictionary<Tuple<TArg1, TArg2>, TResult>();
 			return (s1, s2) =>
 			{
 				var key = Tuple.Create(s1, s2);
@@ -66,14 +46,34 @@ namespace Kostassoid.Nerve.EventStore.Tools
 			};
 		}
 
-        public static Func<TSource1, TSource2, TSource3, TReturn> AsMemoized<TSource1, TSource2, TSource3, TReturn>(this Func<TSource1, TSource2, TSource3, TReturn> func)
+        public static Func<TArg1, TArg2, TArg3, TResult> From<TArg1, TArg2, TArg3, TResult>(Func<TArg1, TArg2, TArg3, TResult> func)
         {
-			var cache = new ConcurrentDictionary<Tuple<TSource1, TSource2, TSource3>, TReturn>();
+			var cache = new ConcurrentDictionary<Tuple<TArg1, TArg2, TArg3>, TResult>();
 			return (s1, s2, s3) =>
 			{
 				var key = Tuple.Create(s1, s2, s3);
 				return cache.GetOrAdd(key, _ => func(s1, s2, s3));
 			};
+		}
+
+        public static Func<TResult> AsMemoized<TResult>(this Func<TResult> func)
+        {
+	        return From(func);
         }
+
+        public static Func<TArg, TResult> AsMemoized<TArg, TResult>(this Func<TArg, TResult> func)
+        {
+	        return From(func);
+        }
+
+        public static Func<TArg1, TArg2, TResult> AsMemoized<TArg1, TArg2, TResult>(this Func<TArg1, TArg2, TResult> func)
+        {
+			return From(func);
+		}
+
+        public static Func<TArg1, TArg2, TArg3, TResult> AsMemoized<TArg1, TArg2, TArg3, TResult>(this Func<TArg1, TArg2, TArg3, TResult> func)
+        {
+			return From(func);
+		}
     }
 }

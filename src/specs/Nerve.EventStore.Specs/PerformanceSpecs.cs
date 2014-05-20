@@ -72,6 +72,7 @@ namespace Kostassoid.Nerve.EventStore.Specs
 				{
 					Task.WaitAll(tasks);
 				}
+				// ReSharper disable once EmptyGeneralCatchClause
 				catch
 				{
 					// handle

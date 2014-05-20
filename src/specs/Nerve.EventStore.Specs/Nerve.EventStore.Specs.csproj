@@ -60,6 +60,8 @@
     <Compile Include="Command\ChangeUserName.cs" />
     <Compile Include="Command\CommandHandler.cs" />
     <Compile Include="Command\CreateUser.cs" />
+    <Compile Include="Helpers\ActionEx.cs" />
+    <Compile Include="Helpers\ExceptionEx.cs" />
     <Compile Include="PerformanceSpecs.cs" />
     <Compile Include="InMemoryEventStorage.cs" />
     <Compile Include="Model\UserAgeChanged.cs" />
@@ -67,6 +69,8 @@
     <Compile Include="Model\UserCreated.cs" />
     <Compile Include="Model\UserNameChanged.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tools\CodeContractsSpecs.cs" />
+    <Compile Include="Tools\MemoizedFuncSpecs.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

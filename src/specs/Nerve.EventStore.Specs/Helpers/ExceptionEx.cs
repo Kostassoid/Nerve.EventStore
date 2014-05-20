@@ -1,4 +1,4 @@
-﻿// Copyright 2014 https://github.com/Kostassoid/Nerve.EventStore
+﻿// Copyright 2014 https://github.com/Kostassoid/Nerve
 //   
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -11,10 +11,16 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 
-using System.Reflection;
-using System.Runtime.CompilerServices;
+namespace Kostassoid.Nerve.EventStore.Specs.Helpers
+{
+	using System;
+	using Machine.Specifications;
 
-[assembly: AssemblyTitle("Nerve.EventStore")]
-
-[assembly: InternalsVisibleTo("Nerve.EventStore.Specs")]
-
+	internal static class ExceptionEx
+	{
+		public static void WithMessage(this Exception ex, string message)
+		{
+			ex.Message.ShouldEqual(message);
+		}
+	}
+}

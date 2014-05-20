@@ -41,8 +41,9 @@
     <Reference Include="Machine.Specifications.Should">
       <HintPath>..\..\packages\Machine.Specifications.Should-Signed.0.7.2\lib\net40\Machine.Specifications.Should.dll</HintPath>
     </Reference>
-    <Reference Include="Nerve.Core">
-      <HintPath>..\..\packages\Nerve.Core.0.7.0.0\lib\net40\Nerve.Core.dll</HintPath>
+    <Reference Include="Nerve.Core, Version=0.8.0.0, Culture=neutral, PublicKeyToken=5ff7e31bc660e0f0, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Nerve.Core.0.8.0.0\lib\net40\Nerve.Core.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

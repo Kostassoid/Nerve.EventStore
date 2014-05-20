@@ -17,32 +17,26 @@ namespace Kostassoid.Nerve.EventStore
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Threading.Tasks;
-	using Core;
-	using Core.Processing.Operators;
-	using Core.Scheduling;
 	using Core.Tpl;
 	using Model;
 	using Storage;
 	using Tools;
 
-	public class EventStore : /*Cell, */IEventStore, IDisposable
+	public class EventStore : IEventStore, IDisposable
 	{
+		const int ProcessorsCount = 4;
+
 		readonly IEventStorage _storage;
 		readonly IList<EventStreamProcessor> _processors; 
 
-		public EventStore(IEventStorage storage)// : base("EventStore", ThreadScheduler.Factory)
+		public EventStore(IEventStorage storage)
 		{
 			_storage = storage;
 
-			_processors = Enumerable.Range(0, 4).Select(_ => new EventStreamProcessor(_storage)).ToList();
-
-/*
-			OnStream().Of<UncommitedEventStream>().ReactWith(s =>
-			{
-				var p = Math.Abs(s.Payload.Root.Id.GetHashCode()%4);
-				s.Return(_processors[p].SendFor<object>(s.Payload).Result);
-			});
-*/
+			_processors = Enumerable
+				.Range(0, ProcessorsCount)
+				.Select(_ => new EventStreamProcessor(_storage))
+				.ToList();
 		}
 
 		private IAggregateRoot InternalLoad(Type type, Guid id)
@@ -68,9 +62,7 @@ namespace Kostassoid.Nerve.EventStore
 
 		public Task Commit(IAggregateRoot root)
 		{
-			//return this.SendFor<object>(root.Flush());
-
-			var p = Math.Abs(root.Id.GetHashCode() % 4);
+			var p = Math.Abs(root.Id.GetHashCode() % ProcessorsCount);
 			return _processors[p].SendFor<object>(root.Flush());
 		}
 
@@ -88,14 +80,12 @@ namespace Kostassoid.Nerve.EventStore
 			return Commit(root);
 		}
 
-		public/* override*/ void Dispose(/*bool isDisposing*/)
+		public void Dispose()
 		{
 			foreach (var processor in _processors)
 			{
 				processor.Dispose();
 			}
-
-			//base.Dispose(isDisposing);
 		}
 	}
 }

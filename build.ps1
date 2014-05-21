@@ -31,7 +31,7 @@ task Test -depends Build, Prerequisites {
 
 	Exec { & ".\src\packages\OpenCover.$OpenCoverVersion\OpenCover.Console.exe" -register:user `
 		"-target:.\src\packages\Machine.Specifications-Signed.$MSpecVersion\tools\mspec-clr4.exe" `
-		"-targetargs:$TestDlls -x Unstable" "-output:$OutputPath\coverage.xml" "-filter:+[*]* -[*-Specs]*" }
+		"-targetargs:$TestDlls -x Unstable" "-output:$OutputPath\coverage.xml" "-filter:+[*]* -[*-Specs]*" "-returntargetcode" }
 }
 
 task Pack -depends Test {

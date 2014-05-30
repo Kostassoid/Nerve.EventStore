@@ -60,6 +60,8 @@
     <Compile Include="BasicSpecs.cs" />
     <Compile Include="Command\ChangeUserName.cs" />
     <Compile Include="Command\CommandHandler.cs" />
+    <Compile Include="Command\CelebrateUserBirthday.cs" />
+    <Compile Include="Command\CommandHandler2.cs" />
     <Compile Include="Command\CreateUser.cs" />
     <Compile Include="Helpers\ActionEx.cs" />
     <Compile Include="Helpers\ExceptionEx.cs" />

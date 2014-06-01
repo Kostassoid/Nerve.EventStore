@@ -8,6 +8,7 @@ namespace Kostassoid.Nerve.EventStore
 	using Core.Scheduling;
 	using Model;
 	using Storage;
+	using Tools;
 
 	internal class EventStreamProcessor : Cell
 	{
@@ -18,6 +19,7 @@ namespace Kostassoid.Nerve.EventStore
 			_storage = storage;
 
 			OnStream().Of<UncommitedEventStream>().ReactWith(ProcessUncommited);
+			OnStream().Of<AggregateIdentity>().ReactWith(Load);
 		}
 
 		void ProcessUncommited(ISignal<UncommitedEventStream> signal)
@@ -61,5 +63,32 @@ namespace Kostassoid.Nerve.EventStore
 
 			signal.Return(uncommited.Events);
 		}
+
+		void Load(ISignal<AggregateIdentity> signal)
+		{
+			var id = signal.Payload.Id;
+			var type = signal.Payload.Type;
+
+
+			var last = _storage.LoadLast(id);
+			if (last == null)
+			{
+				throw new InvalidOperationException(string.Format("Aggregate root of type {0} with id {1} not found.", type.Name, id));
+			}
+
+			var root = (IAggregateRoot)TypeHelpers.New(type);
+
+			foreach (var commit in _storage.LoadSince(id, 0))
+			{
+				foreach (var ev in commit.Events)
+				{
+					root.Apply(ev, true);
+				}
+			}
+
+			signal.Return(root);
+		}
+
+
 	}
 }

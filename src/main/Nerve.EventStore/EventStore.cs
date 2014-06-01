@@ -20,11 +20,10 @@ namespace Kostassoid.Nerve.EventStore
 	using Core.Tpl;
 	using Model;
 	using Storage;
-	using Tools;
 
 	public class EventStore : IEventStore, IDisposable
 	{
-		const int ProcessorsCount = 4;
+		const int ProcessorsCount = 12;
 
 		readonly IEventStorage _storage;
 		readonly IList<EventStreamProcessor> _processors; 
@@ -39,27 +38,6 @@ namespace Kostassoid.Nerve.EventStore
 				.ToList();
 		}
 
-		private IAggregateRoot InternalLoad(Type type, Guid id)
-		{
-			var last = _storage.LoadLast(id);
-			if (last == null)
-			{
-				throw new InvalidOperationException(string.Format("Aggregate root of type {0} with id {1} not found.", type.Name, id));
-			}
-
-			var root = (IAggregateRoot)TypeHelpers.New(type);
-
-			foreach (var commit in _storage.LoadSince(id, 0))
-			{
-				foreach (var ev in commit.Events)
-				{
-					root.Apply(ev, true);
-				}
-			}
-
-			return root;
-		}
-
 		public Task Commit(IAggregateRoot root)
 		{
 			var p = Math.Abs(root.Id.GetHashCode() % ProcessorsCount);
@@ -68,16 +46,8 @@ namespace Kostassoid.Nerve.EventStore
 
 		public Task<T> Load<T>(Guid id) where T : IAggregateRoot
 		{
-			var completion = new TaskCompletionSource<T>();
-			completion.SetResult((T)InternalLoad(typeof (T), id));
-			return completion.Task;
-		}
-
-		public Task OnLoaded<T>(Guid id, Action<T> action)
-		{
-			var root = InternalLoad(typeof (T), id);
-			action((T) root);
-			return Commit(root);
+			var p = Math.Abs(id.GetHashCode() % ProcessorsCount);
+			return _processors[p].SendFor<T>(new AggregateIdentity(typeof(T), id));
 		}
 
 		public void Dispose()

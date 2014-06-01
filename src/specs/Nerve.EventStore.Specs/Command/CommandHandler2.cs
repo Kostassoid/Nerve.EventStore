@@ -1,8 +1,6 @@
 ﻿namespace Kostassoid.Nerve.EventStore.Specs.Command
 {
 	using System;
-	using System.Linq.Expressions;
-	using System.Threading.Tasks;
 	using Model;
 
 	public class CommandHandler2
@@ -63,7 +61,7 @@
 				{
 					if (ex.InnerException is ConcurrencyException)
 					{
-						Console.WriteLine("Concurrency exception [{0}]. Retrying...", ex);
+						//Console.WriteLine("Concurrency exception. Retrying...");
 					}
 					else
 					{
@@ -72,7 +70,7 @@
 				}
 				catch (ConcurrencyException ex)
 				{
-					Console.WriteLine("Concurrency exception [{0}]. Retrying...", ex);
+					//Console.WriteLine("Concurrency exception. Retrying...");
 				}
 			}
 		}

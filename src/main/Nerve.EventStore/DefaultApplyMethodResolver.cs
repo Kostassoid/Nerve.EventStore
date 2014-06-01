@@ -14,6 +14,8 @@
 namespace Kostassoid.Nerve.EventStore
 {
 	using System;
+	using System.Collections.Generic;
+	using System.Linq;
 	using System.Reflection;
 
 	public class DefaultApplyMethodResolver : IApplyMethodResolver
@@ -26,6 +28,12 @@ namespace Kostassoid.Nerve.EventStore
 				null, new[] { eventType }, null);
 
 			//return rootType.GetMethod("On" + eventType.Name, new[] {eventType});
+		}
+
+		public IEnumerable<MethodInfo> ResolveAll(Type rootType)
+		{
+			return rootType.GetMethods(BindingFlags.Instance | BindingFlags.NonPublic)
+				.Where(m => m.Name.StartsWith("On") && m.GetParameters().Count() == 1);
 		}
 	}
 }

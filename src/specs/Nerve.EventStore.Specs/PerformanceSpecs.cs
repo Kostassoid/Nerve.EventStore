@@ -28,6 +28,7 @@ namespace Kostassoid.Nerve.EventStore.Specs
 	{
 		[Subject(typeof(EventStore), "Performance")]
 		[Tags("Unit")]
+		[Ignore("temp")]
 		public class when_heavy_working_with_several_aggregates
 		{
 			const int TotalOps = 30000;

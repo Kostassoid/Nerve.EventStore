@@ -15,7 +15,6 @@ namespace Kostassoid.Nerve.EventStore.Storage
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Threading.Tasks;
 
 	public interface IEventStorage
 	{

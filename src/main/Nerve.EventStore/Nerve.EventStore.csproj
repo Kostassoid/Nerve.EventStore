@@ -65,6 +65,7 @@
     <Compile Include="IEventStore.cs" />
     <Compile Include="Model\AggregateRoot.cs" />
     <Compile Include="Model\DomainSettings.cs" />
+    <Compile Include="Model\EventHandlerRegistry.cs" />
     <Compile Include="Model\IAggregateRoot.cs" />
     <Compile Include="Model\DomainEvent.cs" />
     <Compile Include="Model\IDomainEvent.cs" />

@@ -14,12 +14,16 @@
 namespace Kostassoid.Nerve.EventStore.Model
 {
 	using System;
+	using System.Collections.Generic;
 	using Fasterflect;
 	using Tools;
 	using Tools.CodeContracts;
 
 	public static class DomainSettings
 	{
+		public static IDictionary<Type, EventHandlerRegistry> _handlers
+			= new Dictionary<Type, EventHandlerRegistry>();
+
 		public static IApplyMethodResolver ApplyMethodResolver { get; set; }
 
 		static DomainSettings()
@@ -29,7 +33,17 @@ namespace Kostassoid.Nerve.EventStore.Model
 
 		internal static void Apply(IAggregateRoot root, IDomainEvent ev)
 		{
-			ResolveApplyMethodDelegate(root.GetType(), ev.GetType())(root, ev);
+			var rootType = root.GetType();
+			EventHandlerRegistry registry;
+			if (!_handlers.TryGetValue(rootType, out registry))
+			{
+				registry = new EventHandlerRegistry(ApplyMethodResolver.ResolveAll(rootType));
+				_handlers[rootType] = registry;
+			}
+
+			registry.Handle(root, ev);
+
+			//ResolveApplyMethodDelegate(root.GetType(), ev.GetType())(root, ev);
 		}
 
 		static ApplyMethodDelegate BuildApplyMethod(Type rootType, Type eventType)

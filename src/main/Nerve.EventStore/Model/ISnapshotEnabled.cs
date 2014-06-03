@@ -13,8 +13,8 @@
 
 namespace Kostassoid.Nerve.EventStore.Model
 {
-	public interface ISnapshot : IDomainEvent
+	public interface ISnapshotEnabled
 	{
-		 
+		ISnapshot BuildSnapshot();
 	}
 }

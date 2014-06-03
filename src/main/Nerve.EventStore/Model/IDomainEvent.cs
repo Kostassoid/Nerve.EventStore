@@ -17,7 +17,6 @@ namespace Kostassoid.Nerve.EventStore.Model
 
 	public interface IDomainEvent
 	{
-		string Type { get; }
 		Guid Id { get; }
 		long Version { get; }
 	}

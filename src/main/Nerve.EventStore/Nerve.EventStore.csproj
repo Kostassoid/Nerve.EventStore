@@ -70,6 +70,7 @@
     <Compile Include="Model\DomainEvent.cs" />
     <Compile Include="Model\IDomainEvent.cs" />
     <Compile Include="Model\ISnapshot.cs" />
+    <Compile Include="Model\ISnapshotEnabled.cs" />
     <Compile Include="Model\UncommitedEventStream.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Storage\Commit.cs" />

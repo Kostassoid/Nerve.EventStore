@@ -18,23 +18,21 @@ namespace Kostassoid.Nerve.EventStore.Model
 	public abstract class DomainEvent : IDomainEvent
 	{
 		public DateTime Happened { get; set; }
-		public string Type { get; set; }
 		public Guid Id { get; set; }
 		public long Version { get; set; }
 
 		protected DomainEvent()
 		{}
 
-		protected DomainEvent(string type, Guid id, long version)
+		protected DomainEvent(Guid id, long version)
 		{
-			Type = type;
 			Id = id;
 			Version = version;
 
 			Happened = DateTime.UtcNow;
 		}
 
-		protected DomainEvent(IAggregateRoot root) : this(root.GetType().Name, root.Id, root.Version)
+		protected DomainEvent(IAggregateRoot root) : this(root.Id, root.Version)
 		{
 		}
 	}

@@ -3,7 +3,7 @@
 	using System;
 	using Nerve.EventStore.Model;
 
-	public class User : AggregateRoot
+	public class User : AggregateRoot, ISnapshotEnabled
 	{
 		public string Name { get; private set; }
 		public int Age { get; private set; }
@@ -52,6 +52,19 @@
 		protected void OnUserAgeChanged(UserAgeChanged ev)
 		{
 			Age = ev.NewAge;
+		}
+
+		ISnapshot ISnapshotEnabled.BuildSnapshot()
+		{
+			return new UserSnapshot(this, Name, Age);
+		}
+
+		protected void OnUserSnapshot(UserSnapshot snapshot)
+		{
+			Id = snapshot.Id;
+			Version = snapshot.Version;
+			Name = snapshot.Name;
+			Age = snapshot.Age;
 		}
 	}
 }

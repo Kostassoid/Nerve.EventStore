@@ -42,20 +42,32 @@ namespace Kostassoid.Nerve.EventStore
 			{
 				if (currentVersion != ev.Version)
 				{
-					throw new ConcurrencyException(currentVersion, ev);
+					throw new ConcurrencyException(signal.Payload.Root, ev);
 				}
 
 				commited.Add(ev);
 				currentVersion++;
 			}
 
+			var commitId = last != null ? last.Id + 1 : 0;
+			var snapshot = last != null ? last.Snapshot : null;
+			var snapshotId = last != null ? last.SnapshotId : null;
+
+			if (root is ISnapshotEnabled && last != null && ShouldBuildSnapshot(last))
+			{
+				snapshot = (root as ISnapshotEnabled).BuildSnapshot();
+				snapshotId = commitId;
+			}
+
 			if (commited.Any())
 			{
 				var commit = new Commit(
-					last != null ? last.Id + 1 : 0,
+					commitId,
 					root.Id,
 					targetVersion,
-					commited
+					commited,
+					snapshotId,
+					snapshot
 					);
 
 				_storage.Store(commit);
@@ -64,11 +76,15 @@ namespace Kostassoid.Nerve.EventStore
 			signal.Return(uncommited.Events);
 		}
 
+		bool ShouldBuildSnapshot(Commit last)
+		{
+			return last.Id - (last.SnapshotId.HasValue ? last.SnapshotId.Value : 0) > 10;
+		}
+
 		void Load(ISignal<AggregateIdentity> signal)
 		{
 			var id = signal.Payload.Id;
 			var type = signal.Payload.Type;
-
 
 			var last = _storage.LoadLast(id);
 			if (last == null)
@@ -78,8 +94,16 @@ namespace Kostassoid.Nerve.EventStore
 
 			var root = (IAggregateRoot)TypeHelpers.New(type);
 
-			foreach (var commit in _storage.LoadSince(id, 0))
+			var loadId = last.SnapshotId.HasValue ? last.SnapshotId.Value : 0;
+
+			foreach (var commit in _storage.LoadSince(id, loadId))
 			{
+				if (commit.Snapshot != null)
+				{
+					root.Apply(commit.Snapshot, true);
+					continue;
+				}
+
 				foreach (var ev in commit.Events)
 				{
 					root.Apply(ev, true);

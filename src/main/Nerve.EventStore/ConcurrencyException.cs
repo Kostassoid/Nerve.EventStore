@@ -18,9 +18,9 @@ namespace Kostassoid.Nerve.EventStore
 
 	public class ConcurrencyException : Exception
 	{
-		public ConcurrencyException(long currentVersion, IDomainEvent conflictEvent)
-			: base(string.Format("Expected version of {0} ({1}) to be {2} but got {3}."
-			, conflictEvent.Type, conflictEvent.Id, currentVersion, conflictEvent.Version))
+		public ConcurrencyException(IAggregateRoot root, IDomainEvent conflictEvent)
+			: base(string.Format("Expected version of {0}({1}) to be {2} but got {3}."
+			, root.GetType().Name, root.Id, root.Version, conflictEvent.Version))
 		{
 		}
 	}

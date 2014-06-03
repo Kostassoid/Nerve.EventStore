@@ -18,7 +18,6 @@ namespace Kostassoid.Nerve.EventStore.Specs
 	using System.Linq;
 	using System.Threading.Tasks;
 	using Command;
-	using Core.Tpl;
 	using Machine.Specifications;
 	using Model;
 
@@ -102,7 +101,7 @@ namespace Kostassoid.Nerve.EventStore.Specs
 			const int TotalOps = 30000;
 
 			static EventStore _store;
-			static CommandHandler2 _commandHandler;
+			static CommandHandler _commandHandler;
 
 			static double _ops;
 
@@ -113,7 +112,7 @@ namespace Kostassoid.Nerve.EventStore.Specs
 			private Establish context = () =>
 			{
 				_store = new EventStore(new InMemoryEventStorage());
-				_commandHandler = new CommandHandler2(_store);
+				_commandHandler = new CommandHandler(_store);
 				_ids = Enumerable.Range(1, 10).Select(_ => Guid.NewGuid()).ToArray();
 
 				foreach (var id in _ids)
@@ -159,6 +158,53 @@ namespace Kostassoid.Nerve.EventStore.Specs
 				var total = _ids.Sum(id => _store.Load<User>(id).Result.Age);
 				total.ShouldEqual(TotalOps);
 			};
+		}
+
+		[Subject(typeof(EventStore), "Performance")]
+		[Tags("Unit")]
+		public class when_creating_aggregates_concurrently
+		{
+			const int TotalOps = 300000;
+
+			static EventStore _store;
+			static CommandHandler _commandHandler;
+
+			static double _ops;
+
+			private Cleanup after = () => _store.Dispose();
+
+			private Establish context = () =>
+			{
+				_store = new EventStore(new InMemoryEventStorage());
+				_commandHandler = new CommandHandler(_store);
+			};
+
+			private Because of = () =>
+			{
+				var stopwatch = Stopwatch.StartNew();
+
+				var tasks = Enumerable.Range(0, TotalOps)
+					.Select(i =>
+						Task.Factory.StartNew(() =>
+							_commandHandler.Handle(new CreateUser(Guid.NewGuid(), "Joe", 13))))
+							.ToArray();
+
+				try
+				{
+					Task.WaitAll(tasks);
+				}
+				// ReSharper disable once EmptyGeneralCatchClause
+				catch
+				{
+					// handle
+				}
+
+				_ops = TotalOps / stopwatch.Elapsed.TotalSeconds;
+
+				Console.WriteLine("Ops/s: {0}", _ops);
+			};
+
+			private It should_be_fast = () => _ops.ShouldBeGreaterThan(5000);
 		}
 
 
